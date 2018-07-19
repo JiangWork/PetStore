@@ -14,32 +14,37 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hashing;
 
 @Component
 public class PetStoreAuthenticationProvider implements AuthenticationProvider {
 
-	private static final Logger LOG = LoggerFactory.getLogger(PetStoreAuthenticationProvider.class);
-	
-	private static final Cache<String, Authentication> AUTH_CACHE = CacheBuilder.newBuilder()
+    private static final Logger LOG = LoggerFactory.getLogger(PetStoreAuthenticationProvider.class);
+
+    private static final Cache<String, Authentication> AUTH_CACHE = CacheBuilder.newBuilder()
             .maximumSize(100)
             .initialCapacity(100)
             .expireAfterWrite(3, TimeUnit.HOURS).build();
-	
-	@Autowired
-	private PetStoreUserDetailsService petStoreUserDetailsService;
-	
-	private HashFunction hf = null;
+
+    @Autowired
+    private PetStoreUserDetailsService petStoreUserDetailsService;
     
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private HashFunction hf;
+
     public PetStoreAuthenticationProvider() {
-        hf = Hashing.murmur3_128();
     }
-    
+
     public Authentication getAuthentication(final String hashKey) {
         Authentication authed = null;
         try {
@@ -55,39 +60,68 @@ public class PetStoreAuthenticationProvider implements AuthenticationProvider {
         }
         return authed;
     }
-    
-	@Override
-	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-		// TODO Auto-generated method stub
-		final UsernamePasswordAuthenticationToken userToken = (UsernamePasswordAuthenticationToken) authentication;
-        String username = userToken.getName();
-        String password = (String) authentication.getCredentials();
-        LOG.debug("Authenticating {}:{}.", username, password);
-        UserDetails userDetails = petStoreUserDetailsService.loadUserByUsername(username);
-        Authentication authed;
-        if(userDetails.getPassword().equals(password)) {
-        	authed = createSuccessfulAuthentication(userToken, userDetails);
-        	SecurityContextHolder.getContext().setAuthentication(authed);
-        	System.out.println("Authed");
-        } else {
-        	throw new BadCredentialsException("Incorrect password or account."); 
-        }
-		return authed;
-	}
 
-	protected Authentication createSuccessfulAuthentication(
+
+    @Override
+    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+        Assert.isInstanceOf(UsernamePasswordAuthenticationToken.class, authentication,
+                "Only UsernamePasswordAuthenticationToken is supported");
+        final UsernamePasswordAuthenticationToken userToken = (UsernamePasswordAuthenticationToken) authentication;
+        String username = userToken.getName();
+        String password = (String) userToken.getCredentials();
+
+        LOG.debug("Authenticating {}:{}.", username, passwordEncoder.encode(password));
+        System.out.println(String.format("Authenticating %s:%s.", username, passwordEncoder.encode(password)));
+
+        StringBuilder hashStringBuilder = new StringBuilder(username + ":" + password);
+        String hashKey = hf.hashUnencodedChars(hashStringBuilder.toString()).toString();
+
+        Authentication authed = getAuthentication(hashKey);
+        if(authed == null) {
+            LOG.info("Processing new authentication request for user: {}.", username);
+
+            if (!StringUtils.hasLength(username)) {
+                throw new BadCredentialsException("Empty username.");
+            }
+            if (!StringUtils.hasLength(password)) {
+                throw new BadCredentialsException("Empty Password");
+            }
+            Assert.notNull(password, "Null password was supplied in authentication token");
+            authed = doAuthentication(userToken);
+            AUTH_CACHE.put(hashKey, authed);
+            LOG.info("Authenticated user: {}. ", username);
+        }
+        SecurityContextHolder.getContext().setAuthentication(authed);
+        return authed;
+    }
+
+
+    private Authentication doAuthentication(UsernamePasswordAuthenticationToken userToken) {
+        String username = userToken.getName();
+        String password = (String) userToken.getCredentials();
+        UserDetails user = petStoreUserDetailsService.loadUserByUsername(username);
+        boolean access = passwordEncoder.matches(password, user.getPassword());
+        if(!access) {
+            throw new BadCredentialsException("Incorrect password or account.");
+        }
+        Authentication authed = createSuccessfulAuthentication(userToken, user);
+        return authed;
+    }
+
+
+    protected Authentication createSuccessfulAuthentication(
             UsernamePasswordAuthenticationToken authentication, UserDetails user) {
         UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(
                 authentication.getPrincipal(), authentication.getCredentials(), user.getAuthorities());
         result.setDetails(user);
-
         return result;
     }
-	
-	@Override
-	public boolean supports(Class<?> authentication) {
-		// TODO Auto-generated method stub
-		return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
-	}
+
+
+    @Override
+    public boolean supports(Class<?> authentication) {
+        // TODO Auto-generated method stub
+        return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
+    }
 
 }
