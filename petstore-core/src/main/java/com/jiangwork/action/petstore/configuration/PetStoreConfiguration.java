@@ -3,8 +3,6 @@ package com.jiangwork.action.petstore.configuration;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -28,6 +26,9 @@ public class PetStoreConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     private PetStoreAuthenticationProvider authenticationProvider;
 
+    @Autowired
+    private DataSource dataSource;
+    
     @Autowired
     public void configure(AuthenticationManagerBuilder builder) {
         builder.authenticationProvider(authenticationProvider);
@@ -68,9 +69,33 @@ public class PetStoreConfiguration extends WebSecurityConfigurerAdapter {
         return Hashing.murmur3_128();
     }
     
-    @Bean
-    @ConfigurationProperties("app.datasource")
-    public DataSource dataSource() {
-        return DataSourceBuilder.create().build();
-    }
+    
+    // following is autoconfigured by Spring boot
+//    @Bean
+//    @ConfigurationProperties(prefix="hikari.datasource")
+//    public DataSource dataSource() {
+//        DataSource ds = DataSourceBuilder.create().build();
+//        return ds;
+//    }
+    
+ 
+//
+//    @Bean
+//    public PlatformTransactionManager transactionManager(){
+////        return getDataSourceTransactionManager();
+//        return getJpaTransactionManager();
+//    }
+//
+//    private PlatformTransactionManager getDataSourceTransactionManager() {
+//        DataSourceTransactionManager dataSourceTransactionManager = new DataSourceTransactionManager();
+//        dataSourceTransactionManager.setDataSource(dataSource);
+//        return dataSourceTransactionManager;
+//    }
+//
+//    private PlatformTransactionManager getJpaTransactionManager() {
+//        JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
+//        jpaTransactionManager.setDataSource(dataSource);
+//        System.out.println(">>>>>>>>>" + dataSource);
+//        return jpaTransactionManager;
+//    }
 }

@@ -4,29 +4,44 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
+@Table(name="user")
 public class User {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
-    private Long id;
+    private long id;
     
     private String username;
     private long sign;
     private String email;
     private String password;
+    private String roles;
     
-    @Override
-    public String toString() {
-        return String.format("User[id=%d, username='%s']", id, username);
+    public User() {}
+    
+    public User(long id, String username, long sign, String email, String password, String roles) {
+        super();
+        this.id = id;
+        this.username = username;
+        this.sign = sign;
+        this.email = email;
+        this.password = password;
+        this.roles = roles;
     }
 
-    public Long getId() {
+    @Override
+    public String toString() {
+        return String.format("User[id=%d, username='%s', sign=%d, email=%s, password=%s]", id, username, sign, email, password);
+    }
+
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
     
@@ -60,6 +75,14 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getRoles() {
+        return roles;
+    }
+
+    public void setRoles(String roles) {
+        this.roles = roles;
     }
     
 }
