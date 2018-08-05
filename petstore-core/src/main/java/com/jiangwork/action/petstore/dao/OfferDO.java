@@ -1,4 +1,4 @@
-package com.jiangwork.action.petstore.model;
+package com.jiangwork.action.petstore.dao;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,7 +9,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name="offer")
-public class Offer {
+public class OfferDO {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private long id;
@@ -24,10 +24,10 @@ public class Offer {
     @Column(name="place_timestamp")
     private long placeTimestamp; // the time user puts this offer
     
-    public Offer() {}
+    public OfferDO() {}
     
     
-    public Offer(long id, long userId, String pet, int total, double price, long placeTimestamp) {
+    public OfferDO(long id, long userId, String pet, int total, double price, long placeTimestamp) {
         super();
         this.id = id;
         this.userId = userId;

@@ -3,10 +3,10 @@ package com.jiangwork.action.petstore.dao;
 import java.util.List;
 
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
-import com.jiangwork.action.petstore.model.Offer;
+@Repository
+public interface OfferRepository extends CrudRepository<OfferDO, Long> {
 
-public interface OfferRepository extends CrudRepository<Offer, Long> {
-
-    List<Offer> findByUserid(long userid);
+    List<OfferDO> findByUserId(long userid);
 }

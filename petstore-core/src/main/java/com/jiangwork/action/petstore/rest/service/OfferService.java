@@ -5,9 +5,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.jiangwork.action.petstore.dao.OfferDO;
 import com.jiangwork.action.petstore.dao.OfferRepository;
 import com.jiangwork.action.petstore.dao.UserRepository;
-import com.jiangwork.action.petstore.model.Offer;
 import com.jiangwork.action.petstore.rest.security.PetStoreUserDetails;
 
 @Service
@@ -20,7 +20,7 @@ public class OfferService {
     private UserRepository userRepository;
     
     @PreAuthorize("hasRole('ROLE_USER')")
-    public long addOffer(Offer offer) {
+    public long addOffer(OfferDO offer) {
         if(offer.getTotal() <= 0) {
             throw new IllegalArgumentException(" offer total is less than 0: " + offer.getTotal());
         }
@@ -32,7 +32,7 @@ public class OfferService {
     }
     
     
-    public Offer getOffer(long id) {
+    public OfferDO getOffer(long id) {
         return offerRepository.findById(id).orElse(null);
     }
 }

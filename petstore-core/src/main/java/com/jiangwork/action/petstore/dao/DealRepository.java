@@ -3,10 +3,9 @@ package com.jiangwork.action.petstore.dao;
 import java.util.List;
 
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
-import com.jiangwork.action.petstore.model.Deal;
-import com.jiangwork.action.petstore.model.Offer;
-
-public interface DealRepository extends CrudRepository<Deal, Long>{
-    List<Deal> findByOfferId(long offerid);
+@Repository
+public interface DealRepository extends CrudRepository<DealDO, Long>{
+    List<DealDO> findByOfferId(long offerid);
 }

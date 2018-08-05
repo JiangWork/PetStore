@@ -2,12 +2,11 @@ package com.jiangwork.action.petstore.dao;
 
 import java.util.List;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import com.jiangwork.action.petstore.model.User;
+@Repository
+public interface UserRepository extends JpaRepository<UserDO, Long> {
 
-
-public interface UserRepository extends CrudRepository<User, Long> {
-
-    List<User> findByUsername(String username);
+    List<UserDO> findByUsername(String username);
 }

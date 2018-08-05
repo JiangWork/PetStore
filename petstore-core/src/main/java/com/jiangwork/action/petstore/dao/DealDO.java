@@ -1,4 +1,4 @@
-package com.jiangwork.action.petstore.model;
+package com.jiangwork.action.petstore.dao;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -10,7 +10,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name="deal")
-public class Deal {
+public class DealDO {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
@@ -29,9 +29,9 @@ public class Deal {
     @Convert(converter=DealStatusConverter.class)
     private DealStatus status;
     
-    public Deal() {}
+    public DealDO() {}
     
-    public Deal(long id, long offerId, int quantity, long buyer, double cost, long placeTimestamp, DealStatus status) {
+    public DealDO(long id, long offerId, int quantity, long buyer, double cost, long placeTimestamp, DealStatus status) {
         super();
         this.id = id;
         this.offerId = offerId;

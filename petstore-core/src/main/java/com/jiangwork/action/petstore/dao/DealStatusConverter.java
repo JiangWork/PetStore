@@ -1,11 +1,11 @@
-package com.jiangwork.action.petstore.model;
+package com.jiangwork.action.petstore.dao;
 
 import javax.persistence.AttributeConverter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jiangwork.action.petstore.model.Deal.DealStatus;
+import com.jiangwork.action.petstore.dao.DealDO.DealStatus;
 
 
 public class DealStatusConverter implements AttributeConverter<DealStatus, Integer>{

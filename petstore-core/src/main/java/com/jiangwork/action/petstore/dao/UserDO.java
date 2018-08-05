@@ -1,4 +1,4 @@
-package com.jiangwork.action.petstore.model;
+package com.jiangwork.action.petstore.dao;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -8,7 +8,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name="user")
-public class User {
+public class UserDO {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
@@ -20,9 +20,9 @@ public class User {
     private String password;
     private String roles;
     
-    public User() {}
+    public UserDO() {}
     
-    public User(long id, String username, long sign, String email, String password, String roles) {
+    public UserDO(long id, String username, long sign, String email, String password, String roles) {
         super();
         this.id = id;
         this.username = username;
@@ -32,6 +32,16 @@ public class User {
         this.roles = roles;
     }
 
+    public UserDO(String username, long sign, String email, String password, String roles) {
+        super();
+        this.username = username;
+        this.sign = sign;
+        this.email = email;
+        this.password = password;
+        this.roles = roles;
+    }
+
+    
     @Override
     public String toString() {
         return String.format("User[id=%d, username='%s', sign=%d, email=%s, password=%s]", id, username, sign, email, password);

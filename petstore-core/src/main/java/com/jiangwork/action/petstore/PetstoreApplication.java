@@ -12,8 +12,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.jiangwork.action.petstore.dao.UserDO;
 import com.jiangwork.action.petstore.dao.UserRepository;
-import com.jiangwork.action.petstore.model.User;
 
 @SpringBootApplication
 public class PetstoreApplication {
@@ -34,13 +34,13 @@ public class PetstoreApplication {
                 System.out.println("Bean>" + name + ":" + context.getBean(name));
             });
             // save a couple of customers
-            repository.save(new User(1, "jiangzhao", System.currentTimeMillis(), "abc@email.com", passwordEncoder.encode("123"), "user,admin"));
-            repository.save(new User(2, "jackson", System.currentTimeMillis(), "abc@email.com", passwordEncoder.encode("123"), "user,admin"));
+            repository.save(new UserDO(1, "jiangzhao", System.currentTimeMillis(), "abc@email.com", passwordEncoder.encode("123"), "user,admin"));
+            repository.save(new UserDO(2, "jackson", System.currentTimeMillis(), "abc@email.com", passwordEncoder.encode("123"), "user"));
 
             // fetch all customers
             log.info("Customers found with findAll():");
             log.info("-------------------------------");
-            for (User customer : repository.findAll()) {
+            for (UserDO customer : repository.findAll()) {
                 log.info(customer.toString());
             }
             log.info("");
