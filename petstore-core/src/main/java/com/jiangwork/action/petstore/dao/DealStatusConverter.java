@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 
 import com.jiangwork.action.petstore.dao.DealDO.DealStatus;
 
+import java.util.stream.Stream;
+
 
 public class DealStatusConverter implements AttributeConverter<DealStatus, Integer>{
 
@@ -21,6 +23,8 @@ public class DealStatusConverter implements AttributeConverter<DealStatus, Integ
     @Override
     public DealStatus convertToEntityAttribute(Integer dbData) {
         // TODO Auto-generated method stub
+//        Stream.of(DealStatus.values()).filter((status)->status.getValue()==dbData)
+//                .findFirst().orElseThrow(new IllegalArgumentException(errorMsg));
         for(DealStatus status: DealStatus.values()) {
             if(status.getValue() == dbData) {
                 return status;

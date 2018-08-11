@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface OfferRepository extends JpaRepository<OfferDO, Long>, JpaSpecificationExecutor<OfferDO> {
+public interface AnotherSameUserRepository extends JpaRepository<AnotherSameUserDo, Long>, JpaSpecificationExecutor<AnotherSameUserDo> {
 
-    List<OfferDO> findByUserId(long userid);
+    List<AnotherSameUserDo> findByUsername(String username);
 }

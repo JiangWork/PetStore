@@ -2,6 +2,7 @@ package com.jiangwork.action.petstore;
 
 import java.util.Arrays;
 
+import com.jiangwork.action.petstore.dao.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +12,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import com.jiangwork.action.petstore.dao.UserDO;
-import com.jiangwork.action.petstore.dao.UserRepository;
 
 @SpringBootApplication
 public class PetstoreApplication {
@@ -28,7 +26,7 @@ public class PetstoreApplication {
 	
 	
 	@Bean
-    public CommandLineRunner demo(UserRepository repository, PasswordEncoder passwordEncoder) {
+    public CommandLineRunner demo(UserRepository repository, AnotherSameUserRepository repo, PasswordEncoder passwordEncoder) {
         return (args) -> {
             Arrays.asList(context.getBeanDefinitionNames()).stream().forEach((name)->{
                 System.out.println("Bean>" + name + ":" + context.getBean(name));
@@ -43,6 +41,16 @@ public class PetstoreApplication {
             for (UserDO customer : repository.findAll()) {
                 log.info(customer.toString());
             }
+            log.info("");
+            
+         // fetch all customers
+            repo.save(new AnotherSameUserDo(5, "another user", "email@email.com", "roles"));
+            log.info("Customers found with AnotherSameUserRepository():");
+            log.info("-------------------------------");
+            for (AnotherSameUserDo customer : repo.findAll()) {
+                log.info(customer.toString());
+            }
+
             log.info("");
 
             // fetch an individual customer by ID
