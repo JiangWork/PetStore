@@ -2,6 +2,7 @@ package com.jiangwork.action.petstore;
 
 import java.util.Arrays;
 
+import com.google.common.collect.Lists;
 import com.jiangwork.action.petstore.dao.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +12,15 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.acls.domain.BasePermission;
+import org.springframework.security.acls.domain.ObjectIdentityImpl;
+import org.springframework.security.acls.domain.PrincipalSid;
+import org.springframework.security.acls.model.*;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootApplication
 public class PetstoreApplication {
@@ -26,7 +35,9 @@ public class PetstoreApplication {
 	
 	
 	@Bean
-    public CommandLineRunner demo(UserRepository repository, AnotherSameUserRepository repo, PasswordEncoder passwordEncoder) {
+    @Transactional
+    public CommandLineRunner demo(UserRepository repository, AnotherSameUserRepository repo, PasswordEncoder passwordEncoder,
+                                  MutableAclService aclService) {
         return (args) -> {
             Arrays.asList(context.getBeanDefinitionNames()).stream().forEach((name)->{
                 System.out.println("Bean>" + name + ":" + context.getBean(name));
@@ -72,6 +83,26 @@ public class PetstoreApplication {
             //  log.info(bauer.toString());
             // }
             log.info("");
+            SecurityContextHolder.getContext().setAuthentication(
+                    new UsernamePasswordAuthenticationToken("jiangzhao", "jiangzhao",
+                            Lists.newArrayList(new SimpleGrantedAuthority("ROLE_USER"))));
+            ObjectIdentity oi = new ObjectIdentityImpl(User.class, 2);
+            Sid sid = new PrincipalSid("jiangzhao");
+            Permission p = BasePermission.ADMINISTRATION;
+            // Create or update the relevant ACL
+            MutableAcl acl = null;
+            try {
+                acl = (MutableAcl) aclService.readAclById(oi);
+            } catch (NotFoundException nfe) {
+                acl = aclService.createAcl(oi);
+            }
+
+            // Now grant some permissions via an access control entry (ACE)
+            acl.insertAce(acl.getEntries().size(), p, sid, true);
+            aclService.updateAcl(acl);
+
+            acl = (MutableAcl) aclService.readAclById(oi);
+
         };
     }
 

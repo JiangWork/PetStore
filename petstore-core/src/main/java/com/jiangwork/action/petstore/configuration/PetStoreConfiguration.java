@@ -1,16 +1,28 @@
 package com.jiangwork.action.petstore.configuration;
 
 import javax.sql.DataSource;
+import javax.xml.crypto.Data;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.PermissionEvaluator;
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
+import org.springframework.security.acls.AclPermissionEvaluator;
+import org.springframework.security.acls.domain.*;
+import org.springframework.security.acls.jdbc.BasicLookupStrategy;
+import org.springframework.security.acls.jdbc.JdbcMutableAclService;
+import org.springframework.security.acls.jdbc.LookupStrategy;
+import org.springframework.security.acls.model.AclService;
+import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 
@@ -29,7 +41,7 @@ public class PetStoreConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private DataSource dataSource;
-    
+
     @Autowired
     public void configure(AuthenticationManagerBuilder builder) {
         builder.authenticationProvider(authenticationProvider);
@@ -38,16 +50,16 @@ public class PetStoreConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         //        http.authorizeRequests()
-        //                .antMatchers("/**/search", "/**/feedback").permitAll() 
+        //                .antMatchers("/**/search", "/**/feedback").permitAll()
         //                .antMatchers("/test/**").permitAll()
         //                .antMatchers("/admin/**").permitAll()
         //      .antMatchers("/**").hasRole("USER")
         //                .and().csrf().disable().
-        //                httpBasic().and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS); 
-        // see https://docs.spring.io/spring-security/site/docs/5.0.5.RELEASE/reference/htmlsingle/#jc-authorize-requests 
+        //                httpBasic().and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        // see https://docs.spring.io/spring-security/site/docs/5.0.5.RELEASE/reference/htmlsingle/#jc-authorize-requests
 
         http.authorizeRequests()
-        .antMatchers("/**/search", "/**/feedback").permitAll() 
+        .antMatchers("/**/search", "/**/feedback").permitAll()
         .antMatchers("/test/**").permitAll()
         .antMatchers("/admin/**").permitAll()
         .antMatchers("/**").hasRole("USER")
@@ -69,8 +81,37 @@ public class PetStoreConfiguration extends WebSecurityConfigurerAdapter {
     public HashFunction hashFunction() {
         return Hashing.murmur3_128();
     }
-    
-    
+
+
+    @Bean
+    public MutableAclService aclService(DataSource dataSource, LookupStrategy lookupStrategy, SpringCacheBasedAclCache cache) {
+        return new JdbcMutableAclService(dataSource, lookupStrategy, cache);
+    }
+
+    @Bean
+    public SpringCacheBasedAclCache aclCache(ConsoleAuditLogger consoleAuditLogger) {
+        return new SpringCacheBasedAclCache(new ConcurrentMapCache("aclCache"),
+                new DefaultPermissionGrantingStrategy(consoleAuditLogger),
+                new AclAuthorizationStrategyImpl(new SimpleGrantedAuthority("ROLE_ACL_ADMIN")));
+    }
+
+    @Bean
+    public ConsoleAuditLogger consoleAuditLogger() {
+        return new ConsoleAuditLogger();
+    }
+
+    @Bean
+    public LookupStrategy lookupStrategy(DataSource ds, SpringCacheBasedAclCache cache, ConsoleAuditLogger consoleAuditLogger) {
+        return new BasicLookupStrategy(ds, cache, new AclAuthorizationStrategyImpl(new SimpleGrantedAuthority("ROLE_ADMINISTRATOR")),
+                consoleAuditLogger);
+    }
+
+    @Bean
+    public PermissionEvaluator permissionEvaluator(AclService aclService) {
+        return new AclPermissionEvaluator(aclService);
+    }
+
+
     // following is autoconfigured by Spring boot
 //    @Bean
 //    @ConfigurationProperties(prefix="hikari.datasource")
@@ -78,8 +119,8 @@ public class PetStoreConfiguration extends WebSecurityConfigurerAdapter {
 //        DataSource ds = DataSourceBuilder.create().build();
 //        return ds;
 //    }
-    
- 
+
+
 //
 //    @Bean
 //    public PlatformTransactionManager transactionManager(){

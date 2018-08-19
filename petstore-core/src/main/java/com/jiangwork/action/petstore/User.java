@@ -1,6 +1,10 @@
 package com.jiangwork.action.petstore;
 
-public class User {
+import com.jiangwork.action.petstore.rest.security.acl.PetStoreIdentity;
+
+import java.io.Serializable;
+
+public class User implements PetStoreIdentity {
     private long id;
     private String username;
     private String email;
@@ -72,5 +76,14 @@ public class User {
         user.username = name;
         return user;
     }
-    
+
+    @Override
+    public Serializable getIdentifier() {
+        return id;
+    }
+
+    @Override
+    public String getType() {
+        return User.class.getCanonicalName();
+    }
 }

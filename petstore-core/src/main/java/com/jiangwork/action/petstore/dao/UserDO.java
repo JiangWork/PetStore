@@ -10,7 +10,7 @@ import org.hibernate.annotations.Where;
 
 @Entity
 @Table(name="user")
-@Where(clause = "id in (1,2)")
+//@Where(clause = "id in (1,2)")
 public class UserDO {
 
     @Id

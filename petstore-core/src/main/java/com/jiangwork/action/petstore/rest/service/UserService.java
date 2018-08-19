@@ -51,7 +51,8 @@ public class UserService {
         return savedUser.getId();
     }
     
-    @PreAuthorize(AuthContants.HAS_ADMIN_ROLE + " or #U.username == authentication.name")
+    @PreAuthorize(AuthContants.HAS_ADMIN_ROLE + " or #U.username == authentication.name" +
+            " or hasPermission(#project, 'DELETE')")
     public long deleteUser(@P("U") User user) {
         Optional<UserDO> userDO = findUserInternal(user.getUsername());
         if(userDO.isPresent()) {
