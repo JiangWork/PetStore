@@ -4,6 +4,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.temporal.ChronoUnit;
+
 public class BeanCopyProperties {
 
     public static class OneBean {
@@ -107,6 +111,12 @@ public class BeanCopyProperties {
         BeanUtils.copyProperties(one, two);
         System.out.println(one);
         System.out.println(two);
+        LocalDate past = LocalDate.of(2018, 1, 29);
+        LocalDate now = LocalDate.now();
+        long days = past.until(now, ChronoUnit.DAYS);
+        System.out.println(days);
+        System.out.println(Period.between(past, now.plusDays(1)));
+
     }
 
 }
