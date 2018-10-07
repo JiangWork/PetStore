@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @SpringBootApplication
+//@EnablePrometheusEndpoint
 public class PetstoreApplication {
 
     private static final Logger log = LoggerFactory.getLogger(PetstoreApplication.class);

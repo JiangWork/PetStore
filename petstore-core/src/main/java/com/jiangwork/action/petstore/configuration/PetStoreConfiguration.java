@@ -63,6 +63,7 @@ public class PetStoreConfiguration extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
         .antMatchers("/**/search", "/**/feedback").permitAll()
         .antMatchers("/test/**").permitAll()
+                .antMatchers("/metrics").permitAll()
                 .antMatchers("/admin/**").permitAll().antMatchers("/hello/**").permitAll()
         .antMatchers("/**").hasRole("USER")
         .and().csrf().disable().
