@@ -1,12 +1,6 @@
 package com.jiangwork.action.petstore.dao;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
-import org.hibernate.annotations.Where;
+import javax.persistence.*;
 
 @Entity
 @Table(name="user")
@@ -22,6 +16,9 @@ public class UserDO {
     private String email;
     private String password;
     private String roles;
+
+    @Version
+    private Long version;
     
     public UserDO() {}
     
@@ -42,12 +39,6 @@ public class UserDO {
         this.email = email;
         this.password = password;
         this.roles = roles;
-    }
-
-    
-    @Override
-    public String toString() {
-        return String.format("User[id=%d, username='%s', sign=%d, email=%s, password=%s]", id, username, sign, email, password);
     }
 
     public long getId() {
@@ -97,5 +88,17 @@ public class UserDO {
     public void setRoles(String roles) {
         this.roles = roles;
     }
-    
+
+    @Override
+    public String toString() {
+        return "UserDO{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", sign=" + sign +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", roles='" + roles + '\'' +
+                ", version=" + version +
+                '}';
+    }
 }

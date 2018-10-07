@@ -1,16 +1,18 @@
 package com.jiangwork.action.petstore.configuration;
 
-import javax.sql.DataSource;
-import javax.xml.crypto.Data;
-
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
+import com.jiangwork.action.petstore.rest.security.PetStoreAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.PermissionEvaluator;
-import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.acls.AclPermissionEvaluator;
-import org.springframework.security.acls.domain.*;
+import org.springframework.security.acls.domain.AclAuthorizationStrategyImpl;
+import org.springframework.security.acls.domain.ConsoleAuditLogger;
+import org.springframework.security.acls.domain.DefaultPermissionGrantingStrategy;
+import org.springframework.security.acls.domain.SpringCacheBasedAclCache;
 import org.springframework.security.acls.jdbc.BasicLookupStrategy;
 import org.springframework.security.acls.jdbc.JdbcMutableAclService;
 import org.springframework.security.acls.jdbc.LookupStrategy;
@@ -26,9 +28,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hashing;
-import com.jiangwork.action.petstore.rest.security.PetStoreAuthenticationProvider;
+import javax.sql.DataSource;
+import java.util.concurrent.CountDownLatch;
 
 
 @Configuration
@@ -109,6 +110,11 @@ public class PetStoreConfiguration extends WebSecurityConfigurerAdapter {
     @Bean
     public PermissionEvaluator permissionEvaluator(AclService aclService) {
         return new AclPermissionEvaluator(aclService);
+    }
+
+    @Bean
+    public CountDownLatch countDownLatch() {
+        return new CountDownLatch(1);
     }
 
 
