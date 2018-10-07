@@ -1,7 +1,5 @@
 package com.jiangwork.action.petstore.metrics;
 
-import com.codahale.metrics.Metric;
-
 import java.lang.annotation.*;
 
 /**
@@ -16,5 +14,5 @@ public @interface Metriced {
 
     String name();
 
-    Class<? extends Metric> clazz();
+    MetricType type() default MetricType.COUNTER;
 }

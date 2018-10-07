@@ -1,6 +1,5 @@
 package com.jiangwork.action.petstore.rest;
 
-import com.codahale.metrics.Counter;
 import com.jiangwork.action.petstore.User;
 import com.jiangwork.action.petstore.metrics.Metriced;
 import com.jiangwork.action.petstore.rest.service.UserService;
@@ -13,6 +12,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static com.jiangwork.action.petstore.metrics.MetricType.COUNTER;
+
 @RestController
 @RequestMapping(value="/users")
 public class UserController {
@@ -23,7 +24,7 @@ public class UserController {
     private UserService userService;
     
     @RequestMapping(method = { RequestMethod.POST }, produces = { "application/json" })
-    @Metriced(clazz = Counter.class, name = "request-total")
+    @Metriced(type = COUNTER, name = "request-total")
     public long addUser(@RequestBody User user) {
         LOG.info("adding user {}.", user);
         return userService.addUser(user);

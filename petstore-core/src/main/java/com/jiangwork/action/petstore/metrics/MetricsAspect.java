@@ -1,6 +1,9 @@
 package com.jiangwork.action.petstore.metrics;
 
-import com.codahale.metrics.*;
+import com.codahale.metrics.ConsoleReporter;
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
@@ -41,7 +44,7 @@ public class MetricsAspect {
             "|| @annotation(com.jiangwork.action.petstore.metrics.Metrics)")
     public Object advice(ProceedingJoinPoint pjp) throws Throwable {
         MetricedInfo metricsInfo = getMetricsInfo(pjp);
-        String method = metricsInfo.annotatedMethd.getDeclaringClass().getName() + "." + metricsInfo.annotatedMethd.getName();
+        String method = metricsInfo.annotatedMethod.getDeclaringClass().getName() + "." + metricsInfo.annotatedMethod.getName();
         beforeInvocation(metricsInfo.metriceds, method);
         Stopwatch stopwatch = Stopwatch.createStarted();
         try {
@@ -58,21 +61,25 @@ public class MetricsAspect {
         Counter methodExecutingCounter = metricRegistry.counter(method + ".executing-internal");
         methodExecutingCounter.inc();
         for (Metriced metriced : metriceds) {
-            Class<?> clazz = metriced.clazz();
+            MetricType type = metriced.type();
             String name = metriced.name();
             String metricName = method + "." + name;
-            if (Meter.class == clazz) {
-                Meter meter = metricRegistry.meter(metricName);
-                meter.mark();
-            } else if (Gauge.class == clazz) {
-                metricRegistry.gauge(metricName, () -> methodExecutingCounter::getCount);
-            } else if (Counter.class == clazz) {
-                Counter counter = metricRegistry.counter(metricName);
-                counter.inc();
-            } else if (Histogram.class == clazz) {
-                // skip
-            } else {
-                LOGGER.error("Unsupported metric type for beforeInvocation {}", clazz);
+            switch (type) {
+                case COUNTER:
+                    Counter counter = metricRegistry.counter(metricName);
+                    counter.inc();
+                    break;
+                case GAUGE:
+                    metricRegistry.gauge(metricName, () -> methodExecutingCounter::getCount);
+                    break;
+                case HISTOGRAM: // nothing
+                    break;
+                case METER:
+                    Meter meter = metricRegistry.meter(metricName);
+                    meter.mark();
+                    break;
+                default:
+                    LOGGER.error("Unsupported metric type for beforeInvocation {}", type);
             }
         }
     }
@@ -81,8 +88,8 @@ public class MetricsAspect {
         Counter methodExecutingCounter = metricRegistry.counter(method + ".executing-internal");
         methodExecutingCounter.dec();
         for (Metriced metriced : metriceds) {
-            Class<?> clazz = metriced.clazz();
-            if (Histogram.class == clazz) {
+            MetricType type = metriced.type();
+            if (type == MetricType.HISTOGRAM) {
                 String name = metriced.name();
                 String metricName = method + "." + name;
                 metricRegistry.histogram(metricName).update(elapsedTime);
@@ -117,6 +124,7 @@ public class MetricsAspect {
     }
 
 
+    // for rewriting hashCode and equals
     private static class ProceedingJoinPointHolder {
         private ProceedingJoinPoint pjp;
         private Method method;
@@ -147,12 +155,12 @@ public class MetricsAspect {
 
     private static class MetricedInfo {
         private Set<Metriced> metriceds;
-        private Method annotatedMethd;
+        private Method annotatedMethod;
 
         public static MetricedInfo of(Set<Metriced> metriceds, Method annotatedMethd) {
             MetricedInfo info = new MetricedInfo();
             info.metriceds = metriceds;
-            info.annotatedMethd = annotatedMethd;
+            info.annotatedMethod = annotatedMethd;
             return info;
         }
 
@@ -160,8 +168,8 @@ public class MetricsAspect {
             return metriceds;
         }
 
-        public Method getAnnotatedMethd() {
-            return annotatedMethd;
+        public Method getAnnotatedMethod() {
+            return annotatedMethod;
         }
     }
 }
