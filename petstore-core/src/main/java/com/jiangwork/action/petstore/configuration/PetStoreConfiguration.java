@@ -1,5 +1,6 @@
 package com.jiangwork.action.petstore.configuration;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.jiangwork.action.petstore.rest.security.PetStoreAuthenticationProvider;
@@ -62,7 +63,7 @@ public class PetStoreConfiguration extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
         .antMatchers("/**/search", "/**/feedback").permitAll()
         .antMatchers("/test/**").permitAll()
-        .antMatchers("/admin/**").permitAll()
+                .antMatchers("/admin/**").permitAll().antMatchers("/hello/**").permitAll()
         .antMatchers("/**").hasRole("USER")
         .and().csrf().disable().
         httpBasic().and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
@@ -117,6 +118,10 @@ public class PetStoreConfiguration extends WebSecurityConfigurerAdapter {
         return new CountDownLatch(1);
     }
 
+    @Bean
+    public MetricRegistry metricRegistry() {
+        return new MetricRegistry();
+    }
 
     // following is autoconfigured by Spring boot
 //    @Bean

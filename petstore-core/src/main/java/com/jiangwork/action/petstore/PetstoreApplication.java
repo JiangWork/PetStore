@@ -3,7 +3,7 @@ package com.jiangwork.action.petstore;
 import com.jiangwork.action.petstore.dao.AnotherSameUserRepository;
 import com.jiangwork.action.petstore.dao.UserDO;
 import com.jiangwork.action.petstore.dao.UserRepository;
-import com.jiangwork.action.petstore.rest.service.TransactionalUserTestCase;
+import com.jiangwork.action.petstore.rest.SimpleController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,8 @@ import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Arrays;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @SpringBootApplication
 public class PetstoreApplication {
@@ -102,18 +103,18 @@ public class PetstoreApplication {
 //        };
 //    }
 
-    @Bean
-    public CommandLineRunner transactionalAndTemplateMixTest(final TransactionalUserTestCase transactionalUserTestCase, CountDownLatch countDownLatch) {
-        return args -> {
-//            transactionalUserTestCase.test2();
-//            new Thread(()->transactionalUserTestCase.test3()).start();
-//            new Thread(()->transactionalUserTestCase.test3()).start();
-//            countDownLatch.countDown();
-            transactionalUserTestCase.transactionalAndTemplateMixTest();
-
-        };
-
-    }
+//    @Bean
+//    public CommandLineRunner transactionalAndTemplateMixTest(final TransactionalUserTestCase transactionalUserTestCase, CountDownLatch countDownLatch) {
+//        return args -> {
+////            transactionalUserTestCase.test2();
+////            new Thread(()->transactionalUserTestCase.test3()).start();
+////            new Thread(()->transactionalUserTestCase.test3()).start();
+////            countDownLatch.countDown();
+//            transactionalUserTestCase.transactionalAndTemplateMixTest();
+//
+//        };
+//
+//    }
 
     @Bean
     public CommandLineRunner demo(UserRepository repository, AnotherSameUserRepository repo, PasswordEncoder passwordEncoder,
@@ -129,6 +130,17 @@ public class PetstoreApplication {
                 log.info(customer.toString());
             }
             log.info("");
+        };
+    }
+
+    @Bean
+    public CommandLineRunner testMetrics(SimpleController simpleController) {
+        return (args) -> {
+            ExecutorService threadPool = Executors.newFixedThreadPool(50);
+            for (int i = 0; i < 1000; i++) {
+                threadPool.submit(() -> simpleController.hello("zhaojiang"));
+                threadPool.submit(() -> simpleController.helloChinese("zhaojiang"));
+            }
         };
     }
 
