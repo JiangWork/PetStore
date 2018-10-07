@@ -1,20 +1,17 @@
 package com.jiangwork.action.petstore.rest;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
+import com.codahale.metrics.Counter;
+import com.jiangwork.action.petstore.User;
+import com.jiangwork.action.petstore.metrics.Metriced;
+import com.jiangwork.action.petstore.rest.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.jiangwork.action.petstore.User;
-import com.jiangwork.action.petstore.rest.service.UserService;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value="/users")
@@ -26,6 +23,7 @@ public class UserController {
     private UserService userService;
     
     @RequestMapping(method = { RequestMethod.POST }, produces = { "application/json" })
+    @Metriced(clazz = Counter.class, name = "request-total")
     public long addUser(@RequestBody User user) {
         LOG.info("adding user {}.", user);
         return userService.addUser(user);
